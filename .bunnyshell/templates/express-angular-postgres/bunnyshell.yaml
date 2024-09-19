@@ -14,7 +14,7 @@ components:
                 dockerfile: .docker/Dockerfile
                 target: dev
             environment:
-                FRONTEND_URL: 'https://{{ components.app.ingress.hosts[0] }}'
+                FRONTEND_URL: 'https://{{ components.frontend.ingress.hosts[0].hostname }}'
                 POSTGRES_DB: bunny_books
                 POSTGRES_HOST: db
                 POSTGRES_PASSWORD: need-to-replace
@@ -44,7 +44,7 @@ components:
                 subPath: ''
     -
         kind: Application
-        name: app
+        name: frontend
         gitRepo: 'https://github.com/bunnyshell/templates.git'
         gitBranch: angular-books-app/v0.3.0
         gitApplicationPath: components/angular-books-app
@@ -60,7 +60,7 @@ components:
                     reservations:
                         memory: 1G
             environment:
-                API_URL: 'https://{{ components.api.ingress.hosts[0] }}'
+                API_URL: 'https://{{ components.api.ingress.hosts[0].hostname }}'
             labels:
                 kompose.service.healthcheck.readiness.test: 'CMD sh -c "wget --no-verbose --tries=1 --spider http://127.0.0.1:8080 || exit 1"'
                 kompose.service.healthcheck.readiness.interval: 15s
@@ -79,3 +79,14 @@ volumes:
         name: data-volume
         size: 1Gi
         type: disk
+dev:
+    api:
+        -
+            containers:
+                api:
+                    remoteDevProfile: api
+    frontend:
+        -
+            containers:
+                frontend:
+                    remoteDevProfile: frontend
